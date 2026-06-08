@@ -1,0 +1,16 @@
+- Could maybe have a different name so it can be looked up by typing "rae".
+- Could also change name from Quick Search to sth else since it won't only be Quick search.
+
+- Gotta find a word that has multiple meanings and each meaning multiple senses as reference.
+  - "Haz" could be it.
+
+- Maybe it will be easier to get all the info into an object using one set of loops and then put it on screen with another set.
+  - Sounds innefficient.
+
+- Fonts for logo:
+  - C059 *
+  - Serif
+  - FreeSerif
+  - Nimbus Roman
+  - Noto serif
+  - Tex Gyre Pagella

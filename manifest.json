@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "DRAE Búsqueda Rápida",
+    "short_name": "DRAEBR",
+    "version": "0.1",
+    "description": "Extensión de navegador no oficial para realizar búsquedas rápidas en el DRAE",
+    "icons": {
+        "16": "icon-16px.png"
+    },
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "host_permissions": [
+        "*://*/*"
+    ],
+    "permissions": [
+        "contextMenus"
+    ]
+}
