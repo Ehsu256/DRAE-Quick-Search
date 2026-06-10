@@ -12,15 +12,15 @@ async function wordSearch(wordInput) {
     const response = await fetch(`https://rae-api.com/api/words/${wordInput}`);
     const wordObj = await response.json();
     console.log('WORD OBJECT:', wordObj);
-    
+
     if (!wordObj.ok) {
       const wordSuggestions = wordObj.suggestions;
       displaySuggestions(wordInput, wordSuggestions, resultsDisplay);
       throw new Error("Word not found");
-    } else {
-      const wordMeanings = wordObj.data.meanings;
-      displayMeanings(wordInput, wordMeanings, resultsDisplay);
     }
+
+    const wordMeanings = wordObj.data.meanings;
+    await displayMeanings(wordInput, wordMeanings, resultsDisplay);
   } catch (error) {
     console.log(error);
   }
@@ -28,9 +28,9 @@ async function wordSearch(wordInput) {
 
 function displaySuggestions(wordInput, wordSuggestions, resultsDisplay) {
   if (!wordSuggestions) {
-    resultsDisplay.innerHTML = `No se encontró la palabra "${wordInput}"`;
+    resultsDisplay.innerHTML = `La palabra "${wordInput}" no se encontró.`;
   } else {
-    resultsDisplay.innerHTML = `No se encontró la palabra "${wordInput}" <br> Palabras similares:`;
+    resultsDisplay.innerHTML = `La palabra "${wordInput}" no se encontró. Palabras similares:`;
   }
 
   const list = document.createElement('ul');
@@ -39,15 +39,21 @@ function displaySuggestions(wordInput, wordSuggestions, resultsDisplay) {
   for (let i = 0; i < wordSuggestions.length; i++) {
     const suggestion = wordSuggestions[i];
     const listItem = document.createElement('li');
+    const number = document.createElement('span');
     const link = document.createElement('a');
 
+    number.className = 'suggestion-number';
+    number.textContent = `${i + 1}. `;
+
     link.href = '#';
+    link.className = 'suggestion-link';
     link.textContent = suggestion;
     link.addEventListener('click', (event) => {
       event.preventDefault();
       displayMeaning(suggestion);
     });
 
+    listItem.appendChild(number);
     listItem.appendChild(link);
     list.appendChild(listItem);
   }
@@ -286,12 +292,51 @@ function makeWordsClickableInParagraph(paragraph) {
   for (const child of children) processNode(child);
 }
 
-function displayMeanings(wordInput, wordMeanings, resultsDisplay) {
+async function resolveMeaningLabel(wordInput) {
+  const rawInput = String(wordInput || '').trim();
+
+  if (!rawInput) {
+    return rawInput;
+  }
+
+  try {
+    const response = await fetch(`https://dle.rae.es/${encodeURIComponent(rawInput)}`, {
+      redirect: 'follow',
+      cache: 'no-store'
+    });
+
+    const finalUrl = new URL(response.url);
+    const lastPart = decodeURIComponent(
+      finalUrl.pathname.split('/').filter(Boolean).pop() || ''
+    ).trim();
+
+    if (!lastPart) {
+      return rawInput;
+    }
+
+    return lastPart.toLowerCase() === rawInput.toLowerCase()
+      ? rawInput
+      : lastPart;
+  } catch (error) {
+    console.warn('No se pudo resolver la URL final del DLE:', error);
+    return rawInput;
+  }
+}
+
+async function displayMeanings(wordInput, wordMeanings, resultsDisplay) {
+  const meaningLabel = await resolveMeaningLabel(wordInput);
+
   for (let i = 0; i < wordMeanings.length; i++) {
     const meaningTitle = document.createElement('span');
     meaningTitle.className = 'meaning-title';
-    if (wordMeanings.length == 1) { meaningTitle.innerHTML = `<a href="https://dle.rae.es/${wordInput}">${wordInput}</a><br>`; }
-    else { meaningTitle.innerHTML = `<a href="https://dle.rae.es/${wordInput}">${wordInput}<sup>${(i + 1)}</sup></a><br>`; }
+    const displayLabel = meaningLabel || wordInput;
+
+    if (wordMeanings.length === 1) {
+      meaningTitle.innerHTML = `<a href="https://dle.rae.es/${encodeURIComponent(displayLabel)}">${displayLabel}</a><br>`;
+    } else {
+      meaningTitle.innerHTML = `<a href="https://dle.rae.es/${encodeURIComponent(displayLabel)}">${displayLabel}<sup>${i + 1}</sup></a><br>`;
+    }
+
     resultsDisplay.appendChild(meaningTitle);
 
     if (wordMeanings[i].origin) {
