@@ -1,6 +1,10 @@
 .suggestions-list {
-  padding-left: 0;
-  margin-left: 0;
+  list-style:none;
+  padding: 0;
+}
+
+.suggestions-list .suggestion-number {
+  font-weight: bold;
 }
 
 body {
@@ -81,7 +85,6 @@ body {
   border-radius: 0;
   outline: none;
   color: #203864;
-  font-weight: bold;
 }
 
 #searchButton {
